@@ -1,0 +1,6 @@
+# Processed individual photons file
+input_single_photons: '/Users/reynier/WORK/EIC/Background/221206_updated_event_gen/combined_data.csv' 
+
+n_events: 10 # events to generate
+integration_window: 100.e-9 # seconds
+seed: 1 # Set random seed. If 0 is passed, then the seed is not fixed
