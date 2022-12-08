@@ -8,7 +8,7 @@ authors: Reynier Cruz-Torres^, Benjamen Sterwerf^^
 
 -----
 
-1. Download csv file stored [here](https://drive.google.com/file/d/1XX78_qeuoMK8xhuOB5QgbUyye7Lv_xPg/view?usp=sharing). You can get this file following one of the following two methods:
+1. Download csv file stored [here](https://drive.google.com/file/d/1XX78_qeuoMK8xhuOB5QgbUyye7Lv_xPg/view?usp=sharing). You can get this file following one of the two methods below:
 
 ```bash
 wget -O combined_data.csv 'https://drive.google.com/uc?export=download&id=1XX78_qeuoMK8xhuOB5QgbUyye7Lv_xPg&confirm=no_antivirus'
