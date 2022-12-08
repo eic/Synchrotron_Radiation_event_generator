@@ -38,11 +38,11 @@ class sr_generator:
 			self.n_events = 10
 
 		if 'integration_window' in self.config:
-			self.integration_window = self.config['integration_window']
+			self.integration_window = (float)(self.config['integration_window'])
 			print("Time integration window selected:",self.integration_window)
 		else:
 			print("Time integration window not provided in config file. Defaulting to 100 ns")
-			self.integration_window = 1e-07
+			self.integration_window = (float)(1e-07)
 
 		if 'seed' in self.config:
 			self.seed = self.config['seed']

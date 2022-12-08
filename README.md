@@ -8,7 +8,17 @@ authors: Reynier Cruz-Torres^, Benjamen Sterwerf^^
 
 -----
 
-1. Download csv file stored [here](https://drive.google.com/file/d/1XX78_qeuoMK8xhuOB5QgbUyye7Lv_xPg/view?usp=sharing).
+1. Download csv file stored [here](https://drive.google.com/file/d/1XX78_qeuoMK8xhuOB5QgbUyye7Lv_xPg/view?usp=sharing). You can get this file following one of the following two methods:
+
+```bash
+wget -O combined_data.csv 'https://drive.google.com/uc?export=download&id=1XX78_qeuoMK8xhuOB5QgbUyye7Lv_xPg&confirm=no_antivirus'
+```
+
+or
+
+```bash
+curl -L 'https://drive.google.com/uc?export=download&id=1XX78_qeuoMK8xhuOB5QgbUyye7Lv_xPg&confirm=no_antivirus' > combined_data.csv
+```
 
 2. Create a yaml configuration file (e.g. ```config.yaml```) with the following information:
 
@@ -25,7 +35,9 @@ python3 sr_generator.py --configFile config.yaml
 
 -----
 
-Libraries needed to run this notebook: ```yaml```, ```numpy```, ```matplotlib.pyplot```, ```pandas```, ```pyhepmc```, ```ROOT```, ```os```, ```argparse``` and ```time```.
+Libraries needed to run this notebook: ```pyyaml```, ```numpy```, ```matplotlib```, ```pandas```, ```pyhepmc```, ```ROOT```, ```os```, ```argparse``` and ```time```.
+
+If you have trouble getting pyroot to work, [this](https://root-forum.cern.ch/t/cannot-import-root-6-22-in-python-3-9-1-could-not-load-cppyy-backend-library/43764/8) may be useful.
 
 
 
