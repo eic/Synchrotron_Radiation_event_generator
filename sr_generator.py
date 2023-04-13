@@ -78,6 +78,8 @@ class sr_generator:
 		self.outHistFileName = self.outHistFileName.replace(".hepmc",".hist.root")
 
 		print('Generated events will be saved in',self.outfname)
+		self.f = hep.io.WriterAscii(self.outfname)
+
 		print('********************************************************')
 
 		self.load_single_photons()
@@ -97,9 +99,10 @@ class sr_generator:
 	# ---------------------------------------
 	def generate_an_event(self):
 		event = []
+		lastbin = self.h1_df.GetNbinsX()
 		if self.integration_window==0 :
-			x = 1800001
-			while x >= 1800000 :
+			x = lastbin+10
+			while x >= lastbin :
 				x = self.h1_df.FindBin(self.h1_df.GetRandom())
 
 			photon = self.df.iloc[x]
@@ -109,7 +112,7 @@ class sr_generator:
 		integrated_so_far = 0.
 		while integrated_so_far < self.integration_window:
 			x = self.h1_df.FindBin(self.h1_df.GetRandom())
-			if x >= 1800000: continue
+			if x >= lastbin: continue
 			photon = self.df.iloc[x]
 			integrated_so_far += 1./photon['NormFact']
 			event.append(photon)
@@ -119,8 +122,8 @@ class sr_generator:
 	def generate(self):
 		print('Generating SR events')
 
+		# For visualization
 		events = []
-		hep_events = []
 		photons_per_event = []
 		z_dist = []
 		rho_dist = []
@@ -182,17 +185,15 @@ class sr_generator:
 			if i == 0:
 				evt.run_info = hep.GenRunInfo()
 				#evt.run_info.weight_names = ["0"]
-			hep_events.append(evt)
-		    # ---------------------------------------------------
 
+			# ---------------------------------------------------
+			self.f.write_event(evt)
 			photons_per_event.append(len(event))
 
+			# --------------------
+			# for plotting
 			if i < 6:
 				events.append(event)
-
-		with hep.io.WriterAscii(self.outfname) as f:
-			for e in hep_events:
-				f.write_event(e)
 
 		# --------------------------
 		# Make some plots
@@ -256,4 +257,3 @@ if __name__=='__main__':
 	generator.generate()
 
 	print('Overall running time:',np.round((time.time()-t0)/60.,2),'min')
-	
