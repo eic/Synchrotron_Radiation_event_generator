@@ -70,6 +70,13 @@ class sr_generator:
 			self.outfname = 'SR_out_int_window_{}ns_nevents_{}_pid_{}_status_{}_{}.hepmc'.format(self.integration_window*1e+09,
 			self.n_events,self.pid,self.status_000,self.status_xyz)
 
+		if self.integration_window == 0:
+			print("Time integration window is set to 0, writing out single photon events only.")
+			self.outfname = 'SR_out_nevents_{}.hepmc'.format(self.n_events)
+
+		self.outHistFileName = self.outfname
+		self.outHistFileName = self.outHistFileName.replace(".hepmc",".hist.root")
+
 		print('Generated events will be saved in',self.outfname)
 		print('********************************************************')
 
@@ -90,6 +97,15 @@ class sr_generator:
 	# ---------------------------------------
 	def generate_an_event(self):
 		event = []
+		if self.integration_window==0 :
+			x = 1800001
+			while x >= 1800000 :
+				x = self.h1_df.FindBin(self.h1_df.GetRandom())
+
+			photon = self.df.iloc[x]
+			event.append(photon)
+			return event
+
 		integrated_so_far = 0.
 		while integrated_so_far < self.integration_window:
 			x = self.h1_df.FindBin(self.h1_df.GetRandom())
@@ -154,7 +170,7 @@ class sr_generator:
 				evt.add_particle(pout)
 				particles_out.append(pout)
 
-				# make sure vertex is not optimized away by WriterAscii
+				# make sure vertex is not optimized away by the Writer
 				v1 = hep.GenVertex((x,y,z,0.))
 				v1.add_particle_in(pin)
 				v1.add_particle_out(pout)
@@ -184,6 +200,12 @@ class sr_generator:
 		self.plot_2d_scatter(events,'x','y','x [mm]','y [mm]',(-40,40),(-40,40),'events_x_v_y.png')
 		self.plot_2d_scatter(events,'z','x','z [mm]','x [mm]',(-5000,3000),(-40,40),'events_z_v_x.png')
 		self.plot_2d_scatter(events,'z','y','z [mm]','y [mm]',(-5000,3000),(-40,40),'events_z_v_y.png')
+
+        # ----------------------------
+		# Save histogram for later use
+		outHistFile = ROOT.TFile.Open ( self.outHistFileName ,"RECREATE")
+		self.h1_df.Write()
+		outHistFile.Close()
 
 	# ---------------------------------------
 	def plot_histo(self,hist,xlabel,fname):
@@ -234,3 +256,4 @@ if __name__=='__main__':
 	generator.generate()
 
 	print('Overall running time:',np.round((time.time()-t0)/60.,2),'min')
+	
