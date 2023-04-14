@@ -72,7 +72,8 @@ class sr_generator:
 
 		if self.integration_window == 0:
 			print("Time integration window is set to 0, writing out single photon events only.")
-			self.outfname = 'SR_out_nevents_{}.hepmc'.format(self.n_events)
+			print("IMPORTANT: We randomize WITHOUT replacing here! This is purely a hepmc conversion of a permutation of the original photons.")
+			self.outfname = 'SR_out_single.hepmc'
 
 		self.outHistFileName = self.outfname
 		self.outHistFileName = self.outHistFileName.replace(".hepmc",".hist.root")
@@ -96,15 +97,23 @@ class sr_generator:
 		for i in range(n_entries):
 			self.h1_df.SetBinContent(i+1,self.df['NormFact'].iloc[i])
 
+		if self.integration_window == 0 :
+			if self.n_events > n_entries :
+				print("Writing out a single photon permutation but you requested more single photons than arte available.")
+				print("Setting n_events to {}".format(n_entries))
+				self.n_events = n_entries
+
+			# Prepare a pool of indices from which we can draw without replacement
+			rng = np.random.default_rng(self.seed)
+			self.lotto_bowl = list (range( 0,n_entries)) # see here for why a list https://stackoverflow.com/questions/20484195/typeerror-range-object-does-not-support-item-assignment
+			rng.shuffle ( self.lotto_bowl )
+			
 	# ---------------------------------------
 	def generate_an_event(self):
 		event = []
 		lastbin = self.h1_df.GetNbinsX()
 		if self.integration_window==0 :
-			x = lastbin+10
-			while x >= lastbin :
-				x = self.h1_df.FindBin(self.h1_df.GetRandom())
-
+			x = self.lotto_bowl.pop() # get and remove the last entry
 			photon = self.df.iloc[x]
 			event.append(photon)
 			return event
@@ -129,8 +138,9 @@ class sr_generator:
 		rho_dist = []
 
 		for i in range(self.n_events):
-			event = self.generate_an_event()
+			if  i % 10000 == 0 : print('Working on event {} / {}'.format( i+1, self.n_events))
 
+			event = self.generate_an_event()
 			# ---------------------------------------------------
 			# Save to hepmc format
 			# implemented following the example from:
