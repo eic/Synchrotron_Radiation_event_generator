@@ -75,8 +75,10 @@ class sr_generator:
 			print("IMPORTANT: We randomize WITHOUT replacing here! This is purely a hepmc conversion of a permutation of the original photons.")
 			self.outfname = 'SR_out_single.hepmc'
 
-		self.outHistFileName = self.outfname
-		self.outHistFileName = self.outHistFileName.replace(".hepmc",".hist.root")
+		self.saveHisto = False
+		if self.saveHisto :
+			self.outHistFileName = self.outfname
+			self.outHistFileName = self.outHistFileName.replace(".hepmc",".hist.root")
 
 		print('Generated events will be saved in',self.outfname)
 		self.f = hep.io.WriterAscii(self.outfname)
@@ -116,7 +118,7 @@ class sr_generator:
 			x = self.lotto_bowl.pop() # get and remove the last entry
 			photon = self.df.iloc[x]
 			event.append(photon)
-			return event
+			return event,photon['NormFact']
 
 		integrated_so_far = 0.
 		while integrated_so_far < self.integration_window:
@@ -125,7 +127,8 @@ class sr_generator:
 			photon = self.df.iloc[x]
 			integrated_so_far += 1./photon['NormFact']
 			event.append(photon)
-		return event
+
+		return event,1
 
 	# ---------------------------------------
 	def generate(self):
@@ -140,7 +143,7 @@ class sr_generator:
 		for i in range(self.n_events):
 			if  i % 10000 == 0 : print('Working on event {} / {}'.format( i+1, self.n_events))
 
-			event = self.generate_an_event()
+			event,NormFact = self.generate_an_event()
 			# ---------------------------------------------------
 			# Save to hepmc format
 			# implemented following the example from:
@@ -148,6 +151,8 @@ class sr_generator:
 			
 			evt = hep.GenEvent(hep.Units.GEV, hep.Units.MM)
 			evt.event_number = i+1
+			if self.integration_window == 0: # could keep it for all events, this is just to keep the original output identical
+				evt.weights=[NormFact]
 			particles_out = []
 			particles_in = []
 			vertices = []
@@ -190,12 +195,6 @@ class sr_generator:
 				evt.add_vertex(v1)
 				vertices.append(v1)
 
-		    # -------------------
-		    #evt.weights = [1.0]
-			if i == 0:
-				evt.run_info = hep.GenRunInfo()
-				#evt.run_info.weight_names = ["0"]
-
 			# ---------------------------------------------------
 			self.f.write_event(evt)
 			photons_per_event.append(len(event))
@@ -214,9 +213,10 @@ class sr_generator:
 
         # ----------------------------
 		# Save histogram for later use
-		outHistFile = ROOT.TFile.Open ( self.outHistFileName ,"RECREATE")
-		self.h1_df.Write()
-		outHistFile.Close()
+		if self.saveHisto :
+			outHistFile = ROOT.TFile.Open ( self.outHistFileName ,"RECREATE")
+			self.h1_df.Write()
+			outHistFile.Close()
 
 	# ---------------------------------------
 	def plot_histo(self,hist,xlabel,fname):
