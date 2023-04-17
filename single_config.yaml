@@ -1,0 +1,6 @@
+# Processed individual photons file
+input_single_photons: './combined_data.csv'
+
+n_events: 1800000 # events to generate
+integration_window: 0.0 # seconds
+
