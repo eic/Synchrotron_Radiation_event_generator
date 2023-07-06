@@ -56,6 +56,16 @@ class sr_generator:
             print("The generator seed will be:",self.seed)
             ROOT.gRandom.SetSeed(self.seed)
 
+        if 'makePlots' in self.config:
+            self.makePlots = self.config['makePlots']
+        else:
+            self.makePlots = True
+
+        if self.makePlots :
+            print("Creating plots.")
+        else :
+            print("Suppressing creation of plots.")        
+            
         self.outpath = 'output_plots'
         if not os.path.exists(self.outpath):
             os.makedirs(self.outpath)
@@ -122,11 +132,10 @@ class sr_generator:
         hT.Write()
         hFlux.Write()
         outHistFile.Close()
-        sys.exit()
 
         if self.integration_window == 0 :
             if self.n_events > n_entries :
-                print("Writing out a single photon permutation but you requested more single photons than arte available.")
+                print("Writing out a single photon permutation but you requested more single photons than are available.")
                 print("Setting n_events to {}".format(n_entries))
                 self.n_events = n_entries
 
@@ -135,7 +144,7 @@ class sr_generator:
         rng = np.random.default_rng(self.seed)
         self.lotto_bowl = list (range( 0,n_entries)) # see here for why a list https://stackoverflow.com/questions/20484195/typeerror-range-object-does-not-support-item-assignment
         rng.shuffle ( self.lotto_bowl )
-         
+
     # ---------------------------------------
     def generate_an_event(self):
         event = []
@@ -169,7 +178,7 @@ class sr_generator:
         ri = hep.GenRunInfo()
         ri.weight_names = ["NormFactor"]
         for i in range(self.n_events):
-            if  i % 10000 == 0 : print('Working on event {} / {}'.format( i+1, self.n_events))
+            if  i % 100 == 0 : print('Working on event {} / {}'.format( i+1, self.n_events))
 
             event,NormFact = self.generate_an_event()
             # ---------------------------------------------------
@@ -231,19 +240,20 @@ class sr_generator:
             if i < 6:
                 events.append(event)
 
-        # --------------------------
-        # Make some plots
-        self.plot_histo(photons_per_event,'# photons per event','Nphotons_per_event.png')
-        self.plot_2d_scatter(events,'x','y','x [mm]','y [mm]',(-40,40),(-40,40),'events_x_v_y.png')
-        self.plot_2d_scatter(events,'z','x','z [mm]','x [mm]',(-5000,3000),(-40,40),'events_z_v_x.png')
-        self.plot_2d_scatter(events,'z','y','z [mm]','y [mm]',(-5000,3000),(-40,40),'events_z_v_y.png')
-
         # ----------------------------
         # Save histogram for later use
         if self.saveHisto :
             outHistFile = ROOT.TFile.Open ( self.outHistFileName ,"RECREATE")
             self.h1_df.Write()
             outHistFile.Close()
+
+        # --------------------------
+        # Make some plots
+        if self.makePlots :
+            self.plot_histo(photons_per_event,'# photons per event','Nphotons_per_event.png')
+            self.plot_2d_scatter(events,'x','y','x [mm]','y [mm]',(-40,40),(-40,40),'events_x_v_y.png')
+            self.plot_2d_scatter(events,'z','x','z [mm]','x [mm]',(-5000,3000),(-40,40),'events_z_v_x.png')
+            self.plot_2d_scatter(events,'z','y','z [mm]','y [mm]',(-5000,3000),(-40,40),'events_z_v_y.png')
 
     # ---------------------------------------
     def plot_histo(self,hist,xlabel,fname):
