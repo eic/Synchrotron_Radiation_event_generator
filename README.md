@@ -24,7 +24,7 @@ curl -L 'https://drive.google.com/uc?export=download&id=1XX78_qeuoMK8xhuOB5QgbUy
 
 	- ```input_single_photons```: path to csv file downloaded in step 1.
 	- ```n_events```: number of events to be generated.
-	- ```integration_window```: time window that will define one event.
+	- ```integration_window```: time window that will define one event. Set to 0 for single-photon hepmc events.
 	- ```seed```: random seed for reproducibility. Set to 0 to leave the seed unconstrained.
 
 3. Run the generator as: 
